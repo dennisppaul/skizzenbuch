@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="198"
+   name=""
+   committed-date="2005-09-21T15:09:12.713348Z"
+   url="https://otto/Gestaltung/trunk/gestalt/src/mathematik"
+   last-author="dennis"
+   kind="dir"
+   uuid="7bad5254-0efa-0310-afeb-9dcea176043b"
+   revision="199"/>
+<entry
+   committed-rev="114"
+   name="Random.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-11T10:50:25.485127Z"
+   checksum="ee1b7913413a1df36155774c305af5f3"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="118"
+   name="Ray3f.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-11T19:35:10.206615Z"
+   checksum="6e807180afdd6b5ea36d044ef27997b9"
+   last-author="patrick"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="122"
+   name="Intersection.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-16T07:50:34.384257Z"
+   checksum="2bf71e12cb2ef520cd5527038bf89c3a"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="198"
+   name="Plane3f.java"
+   text-time="2005-09-21T16:00:48.000000Z"
+   committed-date="2005-09-21T15:09:12.713348Z"
+   checksum="9b57e20e611c3e485aa9f15a6367c9c4"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-21T16:00:48.000000Z"/>
+<entry
+   committed-rev="127"
+   name="TransformMatrix4f.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-19T13:10:32.617696Z"
+   checksum="3861066a5e367f69884345b1cba3f943"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="97"
+   name="Vector2f.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-04T07:30:32.906813Z"
+   checksum="39824a59d87e75e13276a1aa36d0386e"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="198"
+   name="Vector3f.java"
+   text-time="2005-09-21T16:00:48.000000Z"
+   committed-date="2005-09-21T15:09:12.713348Z"
+   checksum="a4d37654cdd51b27a44184138d1d6a30"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-21T16:00:48.000000Z"/>
+<entry
+   committed-rev="97"
+   name="Vector4f.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-04T07:30:32.906813Z"
+   checksum="ae66d011ad32b41d8e367ee004d190ca"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="198"
+   name="Util.java"
+   text-time="2005-09-21T16:00:48.000000Z"
+   committed-date="2005-09-21T15:09:12.713348Z"
+   checksum="950afb66d656bd2aefdda8429d7f2e45"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-21T16:00:48.000000Z"/>
+<entry
+   committed-rev="97"
+   name="Matrix3f.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-04T07:30:32.906813Z"
+   checksum="475312428ffce440e7095790fdb8faea"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="138"
+   name="Vector2i.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-25T08:42:09.493392Z"
+   checksum="523fe8c4c8b3c4cd6524ae0f5aa2b826"
+   last-author="patrick"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="112"
+   name="Rectangle3f.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-11T08:16:35.876459Z"
+   checksum="8116d4e8c3bba9c12b2f620ef329b525"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="97"
+   name="Matrix4f.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-04T07:30:32.906813Z"
+   checksum="132f4402a298c26793493ae412e6eaec"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+<entry
+   committed-rev="97"
+   name="Vector3i.java"
+   text-time="2005-09-14T15:01:52.000000Z"
+   committed-date="2005-08-04T07:30:32.906813Z"
+   checksum="42ca49b1d900234e3b6a04a25d15714c"
+   last-author="dennis"
+   kind="file"
+   prop-time="2005-09-14T15:01:52.000000Z"/>
+</wc-entries>

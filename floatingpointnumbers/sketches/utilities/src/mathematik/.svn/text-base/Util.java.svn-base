@@ -1,0 +1,366 @@
+/*
+ * Mathematik
+ *
+ * Copyright (C) 2005 Patrick Kochlik + Dennis Paul
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * {@link http://www.gnu.org/licenses/lgpl.html}
+ *
+ */
+
+/**
+ *
+ * a loose collection of linear algebra methods that are not
+ * connected to a specific class.
+ *
+ */
+
+
+package mathematik;
+
+
+import gestalt.render.plugin.Camera;
+
+
+public class Util {
+
+    /* camera */
+
+    public static final void stickToCameraSurface(final Camera theCamera,
+                                                  final Vector3f thePosition,
+                                                  final float theSurfaceX,
+                                                  final float theSurfaceY) {
+        /* get our destination translation */
+        final float myZ = ( -theCamera.viewport.height * 0.5f) /
+                          (float) Math.tan(Math.toRadians(theCamera.fovy * 0.5f));
+        thePosition.set(theSurfaceX, theSurfaceY, myZ);
+
+        /* transform destination by camera matrix */
+        theCamera.updateRotationMatrix();
+        theCamera.getRotationMatrix().rotation.transform(thePosition);
+        thePosition.add(theCamera.position);
+
+        /* correct frustum offset */
+        final float myScreenWorldPixelRatio = 0.5f / (float) Math.tan(Math.toRadians(theCamera.fovy * 0.5f));
+
+        Vector3f myYOffset = new Vector3f();
+        myYOffset.normalize(theCamera.getUp());
+        myYOffset.scale(theCamera.frustumoffset.y * theCamera.viewport.height * myScreenWorldPixelRatio);
+        thePosition.add(myYOffset);
+
+        Vector3f myXOffset = new Vector3f();
+        myXOffset.normalize(theCamera.getSide());
+        myXOffset.scale(theCamera.frustumoffset.x * theCamera.viewport.width * myScreenWorldPixelRatio);
+        thePosition.add(myXOffset);
+    }
+
+
+    public static final void stickToCameraSurface(final Camera theCamera,
+                                                  final Vector3f thePosition,
+                                                  final Vector2i theSurface) {
+        stickToCameraSurface(theCamera,
+                             thePosition,
+                             theSurface.x,
+                             theSurface.y);
+    }
+
+
+    public static final void stickToCameraSurface(final Camera theCamera,
+                                                  final TransformMatrix4f theMatrix,
+                                                  final int theSurfaceX,
+                                                  final int theSurfaceY) {
+        /* get our destination translation */
+        final float myZ = ( -theCamera.viewport.height * 0.5f) /
+                          (float) Math.tan(Math.toRadians(theCamera.fovy * 0.5f));
+        theMatrix.translation.set(theSurfaceX, theSurfaceY, myZ);
+
+        /* transform destination by camera matrix */
+        theCamera.getRotationMatrix().rotation.transform(theMatrix.translation);
+        theMatrix.translation.add(theCamera.position);
+
+        /* remove camera rotation effect from object */
+        theMatrix.rotation.set(theCamera.getInversRotationMatrix());
+
+        /* correct frustum offset */
+        final float myScreenWorldPixelRatio = 0.5f / (float) Math.tan(Math.toRadians(theCamera.fovy * 0.5f));
+
+        Vector3f myYOffset = new Vector3f();
+        myYOffset.normalize(theCamera.getUp());
+        myYOffset.scale(theCamera.frustumoffset.y * theCamera.viewport.height * myScreenWorldPixelRatio);
+        theMatrix.translation.add(myYOffset);
+
+        Vector3f myXOffset = new Vector3f();
+        myXOffset.normalize(theCamera.getSide());
+        myXOffset.scale(theCamera.frustumoffset.x * theCamera.viewport.width * myScreenWorldPixelRatio);
+        theMatrix.translation.add(myXOffset);
+    }
+
+
+    /* transforms */
+
+    public static final void toCameraSpace(Camera theCamera, Vector3f theLocalResult) {
+        theLocalResult.sub(theCamera.position);
+        theCamera.getRotationMatrix().transform(theLocalResult);
+    }
+
+
+    public static final void toLocalSpace(TransformMatrix4f theLocalSpace, Vector3f theLocalResult) {
+        theLocalResult.sub(theLocalSpace.translation);
+        theLocalSpace.rotation.transform(theLocalResult);
+    }
+
+
+    /* normal */
+
+    private static final Vector3f myAB = new Vector3f();
+
+    private static final Vector3f myBC = new Vector3f();
+
+    /**
+     * calculate a normal from a set of three vectors.
+     *
+     * @param pointA
+     * @param pointB
+     * @param pointC
+     * @param theResultNormal
+     */
+    public static final void calculateNormal(final Vector3f pointA,
+                                             final Vector3f pointB,
+                                             final Vector3f pointC,
+                                             final Vector3f theResultNormal) {
+        myAB.sub(pointB, pointA);
+        myBC.sub(pointC, pointB);
+
+        theResultNormal.cross(myAB, myBC);
+        theResultNormal.normalize();
+    }
+
+
+    public static final void calculateNormal(final Vector3f theVectorAB,
+                                             final Vector3f theVectorBC,
+                                             final Vector3f theResultNormal) {
+        theResultNormal.cross(theVectorAB, theVectorBC);
+        theResultNormal.normalize();
+    }
+
+
+    /* distance */
+
+    private static final Vector3f _myTempVector = new Vector3f();
+
+    /**
+     * return the distance between to points defined by two vectors.
+     *
+     * @param theVectorA
+     *            Vector3f
+     * @param theVectorB
+     *            Vector3f
+     * @return float
+     */
+    public static final float distance(Vector3f theVectorA, Vector3f theVectorB) {
+        _myTempVector.set(theVectorA);
+        return _myTempVector.distance(theVectorB);
+    }
+
+
+    /* add */
+
+    /**
+     * add two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector4f
+     * @param theVectorB
+     *            Vector4f
+     * @return Vector4f
+     */
+    public static final Vector4f add(Vector4f theVectorA, Vector4f theVectorB) {
+        return new Vector4f(theVectorA.w + theVectorB.w,
+                            theVectorA.x + theVectorB.x,
+                            theVectorA.y + theVectorB.y,
+                            theVectorA.z + theVectorB.z);
+    }
+
+
+    /**
+     * add two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector3f
+     * @param theVectorB
+     *            Vector3f
+     * @return Vector3f
+     */
+    public static final Vector3f add(Vector3f theVectorA, Vector3f theVectorB) {
+        return new Vector3f(theVectorA.x + theVectorB.x, theVectorA.y
+                            + theVectorB.y, theVectorA.z + theVectorB.z);
+    }
+
+
+    /**
+     * add two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector2f
+     * @param theVectorB
+     *            Vector2f
+     * @return Vector2f
+     */
+    public static final Vector2f add(Vector2f theVectorA, Vector2f theVectorB) {
+        return new Vector2f(theVectorA.x + theVectorB.x, theVectorA.y
+                            + theVectorB.y);
+    }
+
+
+    /**
+     * add two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector3i
+     * @param theVectorB
+     *            Vector3i
+     * @return Vector3i
+     */
+    public static final Vector3i add(Vector3i theVectorA, Vector3i theVectorB) {
+        return new Vector3i(theVectorA.x + theVectorB.x, theVectorA.y
+                            + theVectorB.y, theVectorA.z + theVectorB.z);
+    }
+
+
+    /**
+     * add two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector2i
+     * @param theVectorB
+     *            Vector2i
+     * @return Vector2i
+     */
+    public static final Vector2i add(Vector2i theVectorA, Vector2i theVectorB) {
+        return new Vector2i(theVectorA.x + theVectorB.x, theVectorA.y
+                            + theVectorB.y);
+    }
+
+
+    /* sub */
+
+    /**
+     * subtract two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector4f
+     * @param theVectorB
+     *            Vector4f
+     * @return Vector4f
+     */
+    public static final Vector4f sub(Vector4f theVectorA, Vector4f theVectorB) {
+        return new Vector4f(theVectorA.w - theVectorB.w, theVectorA.x
+                            - theVectorB.x, theVectorA.y - theVectorB.y, theVectorA.z
+                            - theVectorB.z);
+    }
+
+
+    /**
+     * subtract two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector3f
+     * @param theVectorB
+     *            Vector3f
+     * @return Vector3f
+     */
+    public static final Vector3f sub(Vector3f theVectorA, Vector3f theVectorB) {
+        return new Vector3f(theVectorA.x - theVectorB.x, theVectorA.y
+                            - theVectorB.y, theVectorA.z - theVectorB.z);
+    }
+
+
+    /**
+     * subtract two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector2f
+     * @param theVectorB
+     *            Vector2f
+     * @return Vector2f
+     */
+    public static final Vector2f sub(Vector2f theVectorA, Vector2f theVectorB) {
+        return new Vector2f(theVectorA.x - theVectorB.x, theVectorA.y
+                            - theVectorB.y);
+    }
+
+
+    /**
+     * subtract two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector3i
+     * @param theVectorB
+     *            Vector3i
+     * @return Vector3i
+     */
+    public static final Vector3i sub(Vector3i theVectorA, Vector3i theVectorB) {
+        return new Vector3i(theVectorA.x - theVectorB.x,
+                            theVectorA.y - theVectorB.y,
+                            theVectorA.z - theVectorB.z);
+    }
+
+
+    /**
+     * subtract two vectors and return the result in a new instance.
+     *
+     * @param theVectorA
+     *            Vector2i
+     * @param theVectorB
+     *            Vector2i
+     * @return Vector2i
+     */
+    public static final Vector2i sub(Vector2i theVectorA, Vector2i theVectorB) {
+        return new Vector2i(theVectorA.x - theVectorB.x,
+                            theVectorA.y - theVectorB.y);
+    }
+
+
+    public static final Vector2f scale(Vector2f theVectorA, float theValue) {
+        return new Vector2f(theVectorA.x * theValue,
+                            theVectorA.y * theValue);
+    }
+
+
+    public static final Vector3f scale(Vector3f theVectorA, float theValue) {
+        return new Vector3f(theVectorA.x * theValue,
+                            theVectorA.y * theValue,
+                            theVectorA.z * theValue);
+    }
+
+
+    public static final Vector4f scale(Vector4f theVectorA, float theValue) {
+        return new Vector4f(theVectorA.x * theValue,
+                            theVectorA.y * theValue,
+                            theVectorA.z * theValue,
+                            theVectorA.w * theValue);
+    }
+
+
+    public static final float clamp(float theValue, float theMin, float theMax) {
+        if (theValue > theMax) {
+            theValue = theMax;
+        }
+        if (theValue < theMin) {
+            theValue = theMin;
+        }
+        return theValue;
+    }
+}
