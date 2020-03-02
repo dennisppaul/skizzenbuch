@@ -11,7 +11,7 @@ void settings() {
 }
 
 void setup() {
-  textFont(createFont("Courier", 9));
+  textFont(createFont("SF Mono", 9));
   textAlign(CENTER);
   rectMode(CENTER);
 
@@ -35,7 +35,7 @@ void draw() {
 
   background(255);
   noStroke();
-//  scale(mScaleX, mScaleY);
+  //  scale(mScaleX, mScaleY);
   for (int y=0; y<mASCIICanvas.height; y++) {
     for (int x=0; x<mASCIICanvas.width; x++) {
       drawChar(x, y, mASCIICanvas.data[x][y]);
