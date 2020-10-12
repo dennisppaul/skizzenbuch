@@ -1,11 +1,5 @@
-/* Code adapted for Processing By Ben Fry and Amit Pitaru (2005-10-15) */
-
-import java.awt.print.*;
-
-PrinterJob job;
-
 void setup() {
-  size(200, 200);
+  size(210, 297);
 }
 
 void draw() {
@@ -14,37 +8,19 @@ void draw() {
 }
 
 void keyPressed() {
-  if (key == 't') {
-    printStageThreaded();
-  }
   if (key == 'p') {
-    printStage();
+    printFrame(g);
   }
 }
 
-void printStageThreaded() {
-  job = PrinterJob.getPrinterJob();
-
-  Runnable printRunner = new Runnable() {
-    public void run() {
-      handlePrint();
-    }
-  };
-  javax.swing.SwingUtilities.invokeLater(printRunner);
-}
-
-void printStage() {
-  job = PrinterJob.getPrinterJob();
-  handlePrint();
-}
-
-void handlePrint() {
-  job.setPrintable(new Printable() {
-    public int print(java.awt.Graphics pg, PageFormat f, int pageIndex) {
+void printFrame(final PGraphics pPGraphics) {
+  java.awt.print.PrinterJob mJob = java.awt.print.PrinterJob.getPrinterJob();
+  mJob.setPrintable(new java.awt.print.Printable() {
+    public int print(java.awt.Graphics pg, java.awt.print.PageFormat f, int pageIndex) {
       switch (pageIndex) {
       case 0:
-        pg.drawImage(g.image, 0, 0, null);
-        return Printable.PAGE_EXISTS;
+        pg.drawImage(pPGraphics.image, 0, 0, null);
+        return java.awt.print.Printable.PAGE_EXISTS;
       default:
         return NO_SUCH_PAGE;
       }
@@ -52,9 +28,9 @@ void handlePrint() {
   }
   );
   try {
-    job.print();
-  }
-  catch (PrinterException e) {
-    System.out.println(e);
+    mJob.print();
+  } 
+  catch (Exception e) {
+    e.printStackTrace();
   }
 }
