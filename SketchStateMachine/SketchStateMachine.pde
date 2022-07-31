@@ -1,57 +1,68 @@
-final int MODE_EDIT = 0;
-final int MODE_SIMULATE = 1;
-final int MODE_IDLE = 2;
-
-State mState = new StateEdit();
+State mState = new StateSquare();
 
 void settings() {
-  size(640, 480);
+    size(640, 480);
 }
 
 void setup() {
+    rectMode(CENTER);
 }
 
 void draw() {
-  background(50);
-  fill(255, 0, 0);
-  stroke(255, 0, 0);
+    background(255);
+    fill(0);
+    noStroke();
 
-  mState.loop();
+    mState.loop();
 }
 
 void keyPressed() {
-  if (key=='1') {
-    mState = new StateEdit();
-  }
-  if (key=='2') {
-    mState = new StateSimulate();
-  }
-  if (key=='3') {
-    mState = new StateIdle();
-  }
+    if (key=='1') {
+        mState = new StateSquare();
+    }
+    if (key=='2') {
+        mState = new StateCircleSmall();
+    }
+    if (key=='3') {
+        mState = new StateCircleLarge();
+    }
 }
 
 
 interface State {
-  void loop();
+    void loop();
 }
 
-class StateEdit implements State {
-  void loop() {
-    ellipse(width/2, height/2, 10, 10);
-  }
+class StateSquare implements State {
+    void loop() {
+        square(width/2, height/2, 50);
+    }
 }
 
-class StateSimulate implements State {
-  void loop() {
-    line(0, 0, width, height);
-    mState = new StateIdle();
-  }
+class StateCircleSmall implements State {
+
+    int mCounter = 0;
+
+    void loop() {
+        circle(width/2, height/2, 50);
+        
+        mCounter++;
+        if ( mCounter > 30 ) {
+            mState = new StateCircleLarge();
+        }
+    }
 }
 
-class StateIdle implements State {
-  void loop() {
-    line(width, 0, 0, height);
-    mState = new StateSimulate();
-  }
+class StateCircleLarge implements State {
+
+    int mCounter = 0;
+
+    void loop() {
+        circle(width/2, height/2, 60);
+
+        mCounter++;
+        if ( mCounter > 30 ) {
+            mState = new StateCircleSmall();
+        }
+    }
 }
