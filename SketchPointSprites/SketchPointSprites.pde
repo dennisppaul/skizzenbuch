@@ -1,7 +1,7 @@
 PointSprites fPointSprites;
 PVector[] fPoints;
 
-public void setup() {
+void setup() {
     size(1024, 768, P3D);
     hint(DISABLE_DEPTH_TEST);
     blendMode(ADD);
@@ -18,13 +18,13 @@ public void setup() {
     endPGL();
 }
 
-public void draw() {
+void draw() {
     background(0);
 
     /* rotate view */
     translate(width/2, height/2);
-    rotateX(frameCount*0.003);
-    rotateY(frameCount*0.02);
+    rotateX(frameCount * 0.003);
+    rotateY(frameCount * 0.02);
 
     /* draw a *normal* shape */
     fill(255);

@@ -52,10 +52,10 @@ public static class PointSprites {
         pgl.vertexAttribPointer(mPointPositionLoc, VERT_CMP_COUNT, PGL.FLOAT, false, 0, 0);
 
         final int mHeightNearPlaneLoc = pgl.getUniformLocation(fPointSpriteShader.glProgram, "height_near_plane");
-        float fovy = 60; // degrees
+        float mFOVY = PApplet.radians(60);
         IntBuffer viewport = GLBuffers.newDirectIntBuffer(4);
         pgl.getIntegerv(GL_VIEWPORT, viewport);
-        float heightOfNearPlane = (float)abs(viewport.get(3)-viewport.get(1)) / (2*tan(0.5*fovy*PI/180.0));
+        float heightOfNearPlane = PApplet.abs(viewport.get(3) - viewport.get(1)) / (2 * PApplet.tan(0.5 * mFOVY));
         pgl.uniform1f(mHeightNearPlaneLoc, heightOfNearPlane);
 
         final int mPointSizeLoc = pgl.getUniformLocation(fPointSpriteShader.glProgram, "point_size");
