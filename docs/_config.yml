@@ -22,8 +22,8 @@ title: Skizzenbuch
 email: dennis.paul@hfk-bremen.de
 description: >- # this means to ignore newlines until "baseurl:"
   an uncommented, unorder, and sporadic collection of sketches
-baseurl: "/skizzenbuch" # the subpath of your site, e.g. /blog
-url: "https://dennisppaul.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://dennisppaul.github.io/skizzenbuch" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: 
 github_username:  
 
