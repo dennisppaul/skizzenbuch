@@ -12,7 +12,7 @@ body, h1, h2, h3, h4, h5, h6, p, blockquote, pre, hr, dl, dd, ol, ul, figure { m
 * { font-size: 11px; letter-spacing: 0px; }
 
 /** Basic styling */
-body { font: 400 11px/1.36363636 "Roboto Mono", monospace; color: #000; background-color: #FFF; -webkit-text-size-adjust: 100%; -webkit-font-feature-settings: "kern" 1; -moz-font-feature-settings: "kern" 1; -o-font-feature-settings: "kern" 1; font-feature-settings: "kern" 1; display: block; min-height: 100vh; margin: 29.99999992px; text-align: left; max-width: 640px; }
+body { font: 400 11px/1.36363636 "Roboto Mono", monospace; color: #000; background-color: #FFF; -webkit-text-size-adjust: 100%; -webkit-font-feature-settings: "kern" 1; -moz-font-feature-settings: "kern" 1; -o-font-feature-settings: "kern" 1; font-feature-settings: "kern" 1; display: block; min-height: 100vh; margin: 29.99999992px; text-align: left; max-width: 1024px; }
 
 /** Set `margin-bottom` to maintain vertical rhythm */
 h1, h2, h3, h4, h5, h6, p, blockquote, pre, ul, ol, dl, figure, .highlight { margin-bottom: 15px; }
@@ -55,10 +55,10 @@ code { padding: 1px 2px; }
 pre { padding: 8px 12px; overflow-x: auto; }
 pre > code { border: 0; padding-right: 0; padding-left: 0; }
 
-pre { white-space: pre-wrap; /* css-3 */ white-space: pre; overflow-x: auto; }
+pre { white-space: pre-wrap; /* css-3 */ white-space: pre; overflow-x: auto; white-space: pre-wrap; /* css-3 */ white-space: -moz-pre-wrap; /* Mozilla, since 1999 */ white-space: -pre-wrap; /* Opera 4-6 */ white-space: -o-pre-wrap; /* Opera 7 */ word-wrap: break-word; /* Internet Explorer 5.5+ */ }
 
 /** Wrapper */
-.wrapper { max-width: -webkit-calc(800px - (15px * 2)); max-width: calc(800px - (15px * 2)); margin-left: 14.99999996px; margin-right: 14.99999996px; }
+.wrapper { max-width: 1024px; margin-left: 14.99999996px; margin-right: 14.99999996px; }
 @media screen and (max-width: 800px) { .wrapper { max-width: -webkit-calc(800px - (15px)); max-width: calc(800px - (15px)); } }
 
 /** Clearfix */
