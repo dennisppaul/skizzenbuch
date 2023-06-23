@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Point Sprites in GLSL | Skizzenbuch</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Point Sprites in GLSL" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="an uncommented, unorder, and sporadic collection of sketches" />
+<meta property="og:description" content="an uncommented, unorder, and sporadic collection of sketches" />
+<link rel="canonical" href="http://localhost:4000/point-sprites-in-glsl.html" />
+<meta property="og:url" content="http://localhost:4000/point-sprites-in-glsl.html" />
+<meta property="og:site_name" content="Skizzenbuch" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-20T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Point Sprites in GLSL" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/point-sprites-in-glsl.html"},"url":"http://localhost:4000/point-sprites-in-glsl.html","@type":"BlogPosting","description":"an uncommented, unorder, and sporadic collection of sketches","headline":"Point Sprites in GLSL","dateModified":"2023-06-20T01:00:00+02:00","datePublished":"2023-06-20T01:00:00+02:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Skizzenbuch" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Skizzenbuch</a>
+	  <span class="site-title-sub">
+	  	an uncommented, unorder, and sporadic collection of sketches.
+	  </span>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post-header">  
+        <h2 class="post-title p-name" itemprop="name headline">
+            <span class="post-title-name">Point Sprites in GLSL</span>
+            <time class="dt-published" datetime="2023-06-20T01:00:00+02:00" itemprop="datePublished">
+                (20230620)
+            </time>
+        </h2>
+<!-- 
+        <p class="post-meta"></p>
+ -->
+    </header>
+
+    <div class="post-content e-content" itemprop="articleBody">
+        <p><img src="./assets/2023-06-20-Point_Sprites_in_GLSL.png" alt="Point_Sprites_in_GLSL" /></p>
+
+<p>a <em>point sprite</em> is an OpenGL method to render a single vertex or point as a texture facing the screen plane ( i.e billboards ). it therefore e.g allows to render a single point as something that looks like a glowing sphere.</p>
+
+<p>it was quite a challenge to get <em>point sprites</em> to work in processing … it used to be so simple in <em>old</em> OpenGL. with current OpenGL (3.0++) most things need to be handled in GLSL shaders.</p>
+
+<p>well, the main challenges were to understand that <code class="language-plaintext highlighter-rouge">GL_PROGRAM_POINT_SIZE_EXT</code> would need to be enabled in order to change the point sprite size dynamically within a shader. another challenge was to <em>accept</em> that the actual drawing of the <em>points</em> as point sprites would need to be <em>manually</em> handled in a <em>raw</em> OpenGL Vertex Buffer Object (VBO). and the last big challenge was to <em>accept</em> that the texture mechanism supplied by processing does not work for passing textures to GLSL and therefore the point sprite texture would need to be loaded <em>manually</em>.</p>
+
+<p>on the upside: the rendering of point sprites now runs extremely fast. a MacBook Pro with an <em>AMD Radeon Pro 5300M</em> can easily render more than a million point sprites with a 10×10px point size at 60fps.</p>
+
+<p>the entire sketch can be found here: <a href="https://github.com/dennisppaul/skizzenbuch/tree/master/SketchPointSprites"><code class="language-plaintext highlighter-rouge">SketchPointSprites</code></a>:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">PointSprites</span> <span class="n">fPointSprites</span><span class="o">;</span>
+<span class="nc">PVector</span><span class="o">[]</span> <span class="n">fPoints</span><span class="o">;</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">size</span><span class="o">(</span><span class="mi">1024</span><span class="o">,</span> <span class="mi">768</span><span class="o">,</span> <span class="no">P3D</span><span class="o">);</span>
+    <span class="n">hint</span><span class="o">(</span><span class="no">DISABLE_DEPTH_TEST</span><span class="o">);</span>
+    <span class="n">blendMode</span><span class="o">(</span><span class="no">ADD</span><span class="o">);</span>
+
+    <span class="cm">/* create array of points */</span>
+    <span class="n">fPoints</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PVector</span><span class="o">[</span><span class="mi">100000</span><span class="o">];</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">fPoints</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+        <span class="n">fPoints</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PVector</span><span class="o">(</span><span class="n">random</span><span class="o">(-</span><span class="mi">200</span><span class="o">,</span> <span class="mi">200</span><span class="o">),</span> <span class="n">random</span><span class="o">(-</span><span class="mi">200</span><span class="o">,</span> <span class="mi">200</span><span class="o">),</span> <span class="n">random</span><span class="o">(-</span><span class="mi">200</span><span class="o">,</span> <span class="mi">200</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/* create point sprites */</span>
+    <span class="no">PGL</span> <span class="n">pgl</span> <span class="o">=</span> <span class="n">beginPGL</span><span class="o">();</span>
+    <span class="n">fPointSprites</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PointSprites</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">pgl</span><span class="o">,</span> <span class="n">fPoints</span><span class="o">,</span> <span class="n">dataPath</span><span class="o">(</span><span class="s">"sprite.png"</span><span class="o">));</span>
+    <span class="n">endPGL</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kt">void</span> <span class="nf">draw</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">background</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+
+    <span class="cm">/* rotate view */</span>
+    <span class="n">translate</span><span class="o">(</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="o">,</span> <span class="n">height</span><span class="o">/</span><span class="mi">2</span><span class="o">);</span>
+    <span class="n">rotateX</span><span class="o">(</span><span class="n">frameCount</span> <span class="o">*</span> <span class="mf">0.003</span><span class="o">);</span>
+    <span class="n">rotateY</span><span class="o">(</span><span class="n">frameCount</span> <span class="o">*</span> <span class="mf">0.02</span><span class="o">);</span>
+
+    <span class="cm">/* draw a *normal* shape */</span>
+    <span class="n">fill</span><span class="o">(</span><span class="mi">255</span><span class="o">);</span>
+    <span class="n">noStroke</span><span class="o">();</span>
+    <span class="n">sphere</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+
+    <span class="cm">/* move point sprites */</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">mousePressed</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">fPoints</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="kt">float</span> <span class="n">mOffset</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+            <span class="n">fPoints</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">x</span> <span class="o">+=</span> <span class="n">random</span><span class="o">(-</span><span class="n">mOffset</span><span class="o">,</span> <span class="n">mOffset</span><span class="o">);</span>
+            <span class="n">fPoints</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">y</span> <span class="o">+=</span> <span class="n">random</span><span class="o">(-</span><span class="n">mOffset</span><span class="o">,</span> <span class="n">mOffset</span><span class="o">);</span>
+            <span class="n">fPoints</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">z</span> <span class="o">+=</span> <span class="n">random</span><span class="o">(-</span><span class="n">mOffset</span><span class="o">,</span> <span class="n">mOffset</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="n">fPointSprites</span><span class="o">.</span><span class="na">update</span><span class="o">();</span> <span class="c1">// call this when point locations have changed</span>
+    <span class="o">}</span>
+
+    <span class="cm">/* set point sprite size */</span>
+    <span class="n">fPointSprites</span><span class="o">.</span><span class="na">set_point_size</span><span class="o">(</span><span class="n">map</span><span class="o">(</span><span class="n">mouseX</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">width</span><span class="o">,</span> <span class="mf">0.1</span><span class="o">,</span> <span class="mi">64</span><span class="o">));</span>
+
+    <span class="cm">/* draw point sprite */</span>
+    <span class="no">PGL</span> <span class="n">pgl</span> <span class="o">=</span> <span class="n">beginPGL</span><span class="o">();</span>
+    <span class="n">fPointSprites</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">pgl</span><span class="o">);</span>
+    <span class="n">endPGL</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">PointSprite.pde</code>:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.nio.ByteBuffer</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.nio.ByteOrder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.nio.FloatBuffer</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.nio.IntBuffer</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.net.URL</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.jogamp.opengl.GL</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.jogamp.opengl.GL2</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.jogamp.opengl.GLProfile</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.jogamp.opengl.util.GLBuffers</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.jogamp.opengl.util.texture.TextureData</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.jogamp.opengl.util.texture.TextureIO</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">com</span><span class="o">.</span><span class="na">jogamp</span><span class="o">.</span><span class="na">opengl</span><span class="o">.</span><span class="na">GL2ES3</span><span class="o">.*;</span>
+
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">PointSprites</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nc">PShader</span> <span class="n">fPointSpriteShader</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">VERTEX_SHADER_FILE</span> <span class="o">=</span> <span class="s">"point_sprite_vert.glsl"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">FRAGMENT_SHADER_FILE</span> <span class="o">=</span> <span class="s">"point_sprite_frag.glsl"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">VERT_CMP_COUNT</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;</span> <span class="c1">// assumes 4 components (x, y, z, w)</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">PVector</span><span class="o">[]</span> <span class="n">fPoints</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kt">float</span><span class="o">[]</span> <span class="n">fVBOFloatArray</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">FloatBuffer</span> <span class="n">fVBOFloatBuffer</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">fVBOBufferID</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">fTextureID</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">float</span> <span class="n">fPointSize</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">PointSprites</span><span class="o">(</span><span class="nc">PApplet</span> <span class="n">p</span><span class="o">,</span> <span class="no">PGL</span> <span class="n">pgl</span><span class="o">,</span> <span class="nc">PVector</span><span class="o">[]</span> <span class="n">points</span><span class="o">,</span> <span class="nc">String</span> <span class="n">path_to_sprite</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">fPoints</span> <span class="o">=</span> <span class="n">points</span><span class="o">;</span>
+        <span class="n">fPointSize</span> <span class="o">=</span> <span class="mf">1.0f</span><span class="o">;</span>
+
+        <span class="n">setupShader</span><span class="o">(</span><span class="n">p</span><span class="o">);</span>
+        <span class="n">setupVBO</span><span class="o">(</span><span class="n">pgl</span><span class="o">);</span>
+        <span class="n">setupTexture</span><span class="o">(</span><span class="n">pgl</span><span class="o">,</span> <span class="n">path_to_sprite</span><span class="o">);</span>
+        <span class="n">update</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="no">PGL</span> <span class="n">pgl</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">enable</span><span class="o">(</span><span class="no">GL2</span><span class="o">.</span><span class="na">GL_PROGRAM_POINT_SIZE_EXT</span><span class="o">);</span> <span class="c1">// enable setting point size in shader</span>
+
+        <span class="n">fPointSpriteShader</span><span class="o">.</span><span class="na">bind</span><span class="o">();</span>
+
+        <span class="n">pgl</span><span class="o">.</span><span class="na">bindBuffer</span><span class="o">(</span><span class="no">PGL</span><span class="o">.</span><span class="na">ARRAY_BUFFER</span><span class="o">,</span> <span class="n">fVBOBufferID</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">bufferData</span><span class="o">(</span><span class="no">PGL</span><span class="o">.</span><span class="na">ARRAY_BUFFER</span><span class="o">,</span> <span class="nc">Float</span><span class="o">.</span><span class="na">BYTES</span> <span class="o">*</span> <span class="n">fVBOFloatArray</span><span class="o">.</span><span class="na">length</span><span class="o">,</span> <span class="n">fVBOFloatBuffer</span><span class="o">,</span> <span class="no">PGL</span><span class="o">.</span><span class="na">DYNAMIC_DRAW</span><span class="o">);</span>
+
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">mPointPositionLoc</span> <span class="o">=</span> <span class="n">pgl</span><span class="o">.</span><span class="na">getAttribLocation</span><span class="o">(</span><span class="n">fPointSpriteShader</span><span class="o">.</span><span class="na">glProgram</span><span class="o">,</span> <span class="s">"point_position"</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">enableVertexAttribArray</span><span class="o">(</span><span class="n">mPointPositionLoc</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">vertexAttribPointer</span><span class="o">(</span><span class="n">mPointPositionLoc</span><span class="o">,</span> <span class="no">VERT_CMP_COUNT</span><span class="o">,</span> <span class="no">PGL</span><span class="o">.</span><span class="na">FLOAT</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">mHeightNearPlaneLoc</span> <span class="o">=</span> <span class="n">pgl</span><span class="o">.</span><span class="na">getUniformLocation</span><span class="o">(</span><span class="n">fPointSpriteShader</span><span class="o">.</span><span class="na">glProgram</span><span class="o">,</span> <span class="s">"height_near_plane"</span><span class="o">);</span>
+        <span class="kt">float</span> <span class="n">mFOVY</span> <span class="o">=</span> <span class="nc">PApplet</span><span class="o">.</span><span class="na">radians</span><span class="o">(</span><span class="mi">60</span><span class="o">);</span>
+        <span class="nc">IntBuffer</span> <span class="n">viewport</span> <span class="o">=</span> <span class="nc">GLBuffers</span><span class="o">.</span><span class="na">newDirectIntBuffer</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">getIntegerv</span><span class="o">(</span><span class="no">GL_VIEWPORT</span><span class="o">,</span> <span class="n">viewport</span><span class="o">);</span>
+        <span class="kt">float</span> <span class="n">heightOfNearPlane</span> <span class="o">=</span> <span class="nc">PApplet</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">viewport</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span> <span class="o">-</span> <span class="n">viewport</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">))</span> <span class="o">/</span> <span class="o">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nc">PApplet</span><span class="o">.</span><span class="na">tan</span><span class="o">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">mFOVY</span><span class="o">));</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">uniform1f</span><span class="o">(</span><span class="n">mHeightNearPlaneLoc</span><span class="o">,</span> <span class="n">heightOfNearPlane</span><span class="o">);</span>
+
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">mPointSizeLoc</span> <span class="o">=</span> <span class="n">pgl</span><span class="o">.</span><span class="na">getUniformLocation</span><span class="o">(</span><span class="n">fPointSpriteShader</span><span class="o">.</span><span class="na">glProgram</span><span class="o">,</span> <span class="s">"point_size"</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">uniform1f</span><span class="o">(</span><span class="n">mPointSizeLoc</span><span class="o">,</span> <span class="n">fPointSize</span><span class="o">);</span>
+
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">mPointTextureLoc</span> <span class="o">=</span> <span class="n">pgl</span><span class="o">.</span><span class="na">getUniformLocation</span><span class="o">(</span><span class="n">fPointSpriteShader</span><span class="o">.</span><span class="na">glProgram</span><span class="o">,</span> <span class="s">"point_texture"</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">uniform1i</span><span class="o">(</span><span class="n">mPointTextureLoc</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">activeTexture</span><span class="o">(</span><span class="no">GL</span><span class="o">.</span><span class="na">GL_TEXTURE0</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">bindTexture</span><span class="o">(</span><span class="no">GL</span><span class="o">.</span><span class="na">GL_TEXTURE_2D</span><span class="o">,</span> <span class="n">fTextureID</span><span class="o">);</span>
+
+        <span class="n">pgl</span><span class="o">.</span><span class="na">bindBuffer</span><span class="o">(</span><span class="no">PGL</span><span class="o">.</span><span class="na">ARRAY_BUFFER</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+
+        <span class="n">pgl</span><span class="o">.</span><span class="na">drawArrays</span><span class="o">(</span><span class="no">GL</span><span class="o">.</span><span class="na">GL_POINTS</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">fPoints</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+
+        <span class="n">pgl</span><span class="o">.</span><span class="na">disableVertexAttribArray</span><span class="o">(</span><span class="n">mPointPositionLoc</span><span class="o">);</span>
+        <span class="n">fPointSpriteShader</span><span class="o">.</span><span class="na">unbind</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">set_point_size</span><span class="o">(</span><span class="kt">float</span> <span class="n">point_size</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">fPointSize</span> <span class="o">=</span> <span class="n">point_size</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setupShader</span><span class="o">(</span><span class="nc">PApplet</span> <span class="n">p</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">fPointSpriteShader</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">loadShader</span><span class="o">(</span><span class="no">FRAGMENT_SHADER_FILE</span><span class="o">,</span> <span class="no">VERTEX_SHADER_FILE</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setupVBO</span><span class="o">(</span><span class="no">PGL</span> <span class="n">pgl</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">fVBOFloatArray</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">float</span><span class="o">[</span><span class="no">VERT_CMP_COUNT</span> <span class="o">*</span> <span class="n">fPoints</span><span class="o">.</span><span class="na">length</span><span class="o">];</span>
+        <span class="n">fVBOFloatBuffer</span> <span class="o">=</span> <span class="n">allocateDirectFloatBuffer</span><span class="o">(</span><span class="n">fVBOFloatArray</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+
+        <span class="nc">IntBuffer</span> <span class="n">intBuffer</span> <span class="o">=</span> <span class="nc">IntBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        <span class="n">pgl</span><span class="o">.</span><span class="na">genBuffers</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">intBuffer</span><span class="o">);</span>
+        <span class="n">fVBOBufferID</span> <span class="o">=</span> <span class="n">intBuffer</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setupTexture</span><span class="o">(</span><span class="no">PGL</span> <span class="n">pgl</span><span class="o">,</span> <span class="nc">String</span> <span class="n">path_to_sprite</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">fTextureID</span> <span class="o">=</span> <span class="n">loadTexture</span><span class="o">(</span><span class="n">pgl</span><span class="o">,</span> <span class="n">path_to_sprite</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nf">loadTexture</span><span class="o">(</span><span class="no">PGL</span> <span class="n">gl</span><span class="o">,</span> <span class="nc">String</span> <span class="n">texture_path</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="no">URL</span> <span class="n">texture</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">texture_path</span><span class="o">).</span><span class="na">toURI</span><span class="o">().</span><span class="na">toURL</span><span class="o">();</span>
+
+            <span class="nc">TextureData</span> <span class="n">data</span> <span class="o">=</span> <span class="nc">TextureIO</span><span class="o">.</span><span class="na">newTextureData</span><span class="o">(</span><span class="nc">GLProfile</span><span class="o">.</span><span class="na">getDefault</span><span class="o">(),</span> <span class="n">texture</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="nc">TextureIO</span><span class="o">.</span><span class="na">PNG</span><span class="o">);</span>
+
+            <span class="kt">int</span> <span class="n">level</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="kt">int</span> <span class="n">mTextureID</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+            <span class="nc">IntBuffer</span> <span class="n">textureName</span> <span class="o">=</span> <span class="nc">GLBuffers</span><span class="o">.</span><span class="na">newDirectIntBuffer</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+            <span class="n">gl</span><span class="o">.</span><span class="na">genTextures</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">textureName</span><span class="o">);</span>
+            <span class="n">mTextureID</span> <span class="o">=</span> <span class="n">textureName</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+
+            <span class="n">gl</span><span class="o">.</span><span class="na">bindTexture</span><span class="o">(</span><span class="no">GL_TEXTURE_2D</span><span class="o">,</span> <span class="n">mTextureID</span><span class="o">);</span>
+            <span class="o">{</span>
+                <span class="n">gl</span><span class="o">.</span><span class="na">texImage2D</span><span class="o">(</span><span class="no">GL_TEXTURE_2D</span><span class="o">,</span>
+                    <span class="n">level</span><span class="o">,</span>
+                    <span class="n">data</span><span class="o">.</span><span class="na">getInternalFormat</span><span class="o">(),</span>
+                    <span class="n">data</span><span class="o">.</span><span class="na">getWidth</span><span class="o">(),</span> <span class="n">data</span><span class="o">.</span><span class="na">getHeight</span><span class="o">(),</span>
+                    <span class="n">data</span><span class="o">.</span><span class="na">getBorder</span><span class="o">(),</span>
+                    <span class="n">data</span><span class="o">.</span><span class="na">getPixelFormat</span><span class="o">(),</span> <span class="n">data</span><span class="o">.</span><span class="na">getPixelType</span><span class="o">(),</span>
+                    <span class="n">data</span><span class="o">.</span><span class="na">getBuffer</span><span class="o">());</span>
+
+                <span class="n">gl</span><span class="o">.</span><span class="na">texParameteri</span><span class="o">(</span><span class="no">GL_TEXTURE_2D</span><span class="o">,</span> <span class="no">GL_TEXTURE_BASE_LEVEL</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+                <span class="n">gl</span><span class="o">.</span><span class="na">texParameteri</span><span class="o">(</span><span class="no">GL_TEXTURE_2D</span><span class="o">,</span> <span class="no">GL_TEXTURE_MAX_LEVEL</span><span class="o">,</span> <span class="n">level</span><span class="o">);</span>
+
+                <span class="c1">// TODO test with colors</span>
+                <span class="c1">//IntBuffer swizzle = GLBuffers.newDirectIntBuffer(new int[]{GL_RED, GL_GREEN, GL_BLUE, GL_ONE});</span>
+                <span class="c1">//gl.texParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);</span>
+                <span class="c1">//gl.glTexParameterIiv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);</span>
+                <span class="c1">//destroyBuffer(swizzle);</span>
+            <span class="o">}</span>
+            <span class="n">gl</span><span class="o">.</span><span class="na">bindTexture</span><span class="o">(</span><span class="no">GL_TEXTURE_2D</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">mTextureID</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">ex</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="nc">FloatBuffer</span> <span class="nf">allocateDirectFloatBuffer</span><span class="o">(</span><span class="kt">int</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocateDirect</span><span class="o">(</span><span class="n">n</span> <span class="o">*</span> <span class="nc">Float</span><span class="o">.</span><span class="na">BYTES</span><span class="o">).</span><span class="na">order</span><span class="o">(</span><span class="nc">ByteOrder</span><span class="o">.</span><span class="na">nativeOrder</span><span class="o">()).</span><span class="na">asFloatBuffer</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">update</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">fPoints</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="no">VERT_CMP_COUNT</span><span class="o">;</span>
+            <span class="kd">final</span> <span class="nc">PVector</span> <span class="n">p</span> <span class="o">=</span> <span class="n">fPoints</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+            <span class="n">fVBOFloatArray</span><span class="o">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">x</span><span class="o">;</span>
+            <span class="n">fVBOFloatArray</span><span class="o">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="o">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">y</span><span class="o">;</span>
+            <span class="n">fVBOFloatArray</span><span class="o">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="o">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">z</span><span class="o">;</span>
+            <span class="n">fVBOFloatArray</span><span class="o">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">3</span><span class="o">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="n">fVBOFloatBuffer</span><span class="o">.</span><span class="na">rewind</span><span class="o">();</span>
+        <span class="n">fVBOFloatBuffer</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">fVBOFloatArray</span><span class="o">);</span>
+        <span class="n">fVBOFloatBuffer</span><span class="o">.</span><span class="na">rewind</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>vertex shader:</p>
+
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#version 330 core
+</span>
+<span class="k">uniform</span> <span class="kt">mat4</span> <span class="n">transform</span><span class="p">;</span>
+<span class="k">uniform</span> <span class="kt">float</span> <span class="n">height_near_plane</span><span class="p">;</span>
+<span class="k">uniform</span> <span class="kt">float</span> <span class="n">point_size</span><span class="p">;</span>
+<span class="k">layout</span> <span class="p">(</span><span class="n">location</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">in</span> <span class="kt">vec4</span> <span class="n">point_position</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nb">gl_Position</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="kt">vec4</span><span class="p">(</span><span class="n">point_position</span><span class="p">.</span><span class="n">xyz</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+  <span class="nb">gl_PointSize</span> <span class="o">=</span> <span class="p">(</span><span class="n">height_near_plane</span> <span class="o">*</span> <span class="n">point_size</span><span class="p">)</span> <span class="o">/</span> <span class="nb">gl_Position</span><span class="p">.</span><span class="n">w</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>fragement shader:</p>
+
+<div class="language-glsl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#version 330 core
+</span>
+<span class="k">uniform</span> <span class="kt">sampler2D</span> <span class="n">point_texture</span><span class="p">;</span>
+
+<span class="k">out</span> <span class="kt">vec4</span> <span class="n">color</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">color</span> <span class="o">=</span> <span class="n">texture</span><span class="p">(</span><span class="n">point_texture</span><span class="p">,</span> <span class="nb">gl_PointCoord</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+    </div><a class="u-url" href="/point-sprites-in-glsl.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <div class="wrapper">
+    <span style="background:#000; color: #FFF; text-transform: uppercase;">Imprint</span>&nbsp<br/>
+    Prof Dennis P Paul<br/>
+    Am Speicher XI 8<br/>
+    28217 Bremen<br/>
+    Germany<br/>
+    dennis.paul[at]hfk-bremen.de<br/>
+  </div>
+</footer>
+</body>
+
+</html>
