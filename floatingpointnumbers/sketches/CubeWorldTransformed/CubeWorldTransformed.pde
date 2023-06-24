@@ -43,7 +43,6 @@ public void setup() {
   /* font */
   PFont myFont = loadFont("HelveticaNeue-CondensedBlack-14.vlw");
   textFont(myFont);
-  textMode(SCREEN);
 
   /* grid */
   myGridSize = new Vector3f(360.0f, 400.0f, 600.0f);

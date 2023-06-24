@@ -18,7 +18,6 @@ public void setup() {
   // font
   PFont myFont = loadFont("HelveticaNeue-CondensedBlack-14.vlw");
   textFont(myFont);
-  textMode(SCREEN);
 }
 
 
