@@ -1,4 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-06-23T20:17:24+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Skizzenbuch</title><subtitle>an uncommented, unorder, and sporadic collection of sketches</subtitle><entry><title type="html">Point Sprites in GLSL</title><link href="http://localhost:4000/point-sprites-in-glsl.html" rel="alternate" type="text/html" title="Point Sprites in GLSL" /><published>2023-06-20T01:00:00+02:00</published><updated>2023-06-20T01:00:00+02:00</updated><id>http://localhost:4000/Point_Sprites_in_GLSL</id><content type="html" xml:base="http://localhost:4000/point-sprites-in-glsl.html">&lt;p&gt;&lt;img src=&quot;./assets/2023-06-20-Point_Sprites_in_GLSL.png&quot; alt=&quot;Point_Sprites_in_GLSL&quot; /&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-07-04T17:07:06+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Skizzenbuch</title><subtitle>an uncommented, unorder, and sporadic collection of sketches</subtitle><entry><title type="html">Wrapping Text</title><link href="http://localhost:4000/wrapping-text.html" rel="alternate" type="text/html" title="Wrapping Text" /><published>2023-07-04T01:00:00+02:00</published><updated>2023-07-04T01:00:00+02:00</updated><id>http://localhost:4000/Wrapping_Text</id><content type="html" xml:base="http://localhost:4000/wrapping-text.html">&lt;p&gt;&lt;img src=&quot;./assets/2023-07-04-Wrapping_Text.png&quot; alt=&quot;Wrapping_Text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;a collection of functions that wrap text in 3 simple ways. either for monospaced fonts ( &lt;em&gt;every character has the same width&lt;/em&gt; ) where text is either wrapped after a certain amount of characters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;chop_after_char(String,int)&lt;/code&gt; or after an amount of characters but respecting word integrity ( i.e wraps after next space character ) &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;‌chop_after_word(String,int)&lt;/code&gt; or for proportional fonts ( &lt;em&gt;characters have varying width&lt;/em&gt; ) with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;chop_after_word_proportional&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;the sketch can be found at &lt;a href=&quot;https://github.com/dennisppaul/skizzenbuch/tree/master/SketchWrappingText&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SketchWrappingText&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html"></summary></entry><entry><title type="html">Point Sprites in GLSL</title><link href="http://localhost:4000/point-sprites-in-glsl.html" rel="alternate" type="text/html" title="Point Sprites in GLSL" /><published>2023-06-20T01:00:00+02:00</published><updated>2023-06-20T01:00:00+02:00</updated><id>http://localhost:4000/Point_Sprites_in_GLSL</id><content type="html" xml:base="http://localhost:4000/point-sprites-in-glsl.html">&lt;p&gt;&lt;img src=&quot;./assets/2023-06-20-Point_Sprites_in_GLSL.png&quot; alt=&quot;Point_Sprites_in_GLSL&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;a &lt;em&gt;point sprite&lt;/em&gt; is an OpenGL method to render a single vertex or point as a texture facing the screen plane ( i.e billboards ). it therefore e.g allows to render a single point as something that looks like a glowing sphere.&lt;/p&gt;
 
@@ -251,4 +255,86 @@
 &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
   &lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;texture&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;point_texture&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;gl_PointCoord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html"></summary></entry><entry><title type="html">Thank You Mr. Bresenham</title><link href="http://localhost:4000/thank-you-mr-bresenham.html" rel="alternate" type="text/html" title="Thank You Mr. Bresenham" /><published>2020-03-02T00:00:00+01:00</published><updated>2020-03-02T00:00:00+01:00</updated><id>http://localhost:4000/Thank_You_Mr_Bresenham</id><content type="html" xml:base="http://localhost:4000/thank-you-mr-bresenham.html">&lt;p&gt;&lt;img src=&quot;./assets/2020-03-02-Thank_You_Mr_Bresenham.png&quot; alt=&quot;Thank_You_Mr_Bresenham&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Thank you &lt;a href=&quot;https://en.wikipedia.org/wiki/Jack_Elton_Bresenham&quot;&gt;Jack Elton Bresenham&lt;/a&gt; for the &lt;a href=&quot;https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm&quot;&gt;line algorithm&lt;/a&gt;. It translates nicely into ASCII visualizations and thereby can be used in all sorts of text-based contexts e.g in the drawing tool &lt;a href=&quot;https://github.com/dennisppaul/skizzenbuch/tree/master/SketchASCIIDrawingApplication&quot;&gt;SketchASCIIDrawingApplication&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;output to text file:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                               /+-                                                    
+                                             // | --                                                  
+                                           //   |   ---                                               
+                                         //    |       --                                             
+                                       //      |         ---                                          
+                                     //        |            --                                        
+                                   //          |              ---                                     
+                                 //            |                 --                                   
+                               //             |                    -+                                 
+                             //               |                    /|                                 
+                           //                 |                   / |                                 
+                         +/                   |                  /  |                                 
+                         |\\                  |                 /    |                                
+                         |  \\               |                 /     |                                
+                        |     \\             |                /      |                                
+                        |       \\           |               /       |                                
+                        |         \\         |              /        |                                
+                        |           \\       |              /        |                                
+                        |             \\    |              /         |                                
+                       |                \\  |             /           |                               
+                       |                  \\|            /            |                               
+                       |                    +\          /             |                               
+                       |                    | \\       /              |                               
+                       |                   |    \\    /               |                               
+                      |                    |      \\ /                |                               
+                      |                    +-       +                  |                              
+                      |                  //  ---    |                  |                              
+                      |                 /       --- |                  |                              
+                      |               //           -+-                 |                              
+                     |               /              | ---              |                              
+                     |             //               |    --            |                              
+                     |            /                 |      ---         |                              
+                     |          //                  |         ---       |                             
+                     |         /                    |            ---    |                             
+                    |        //                     |               --- |                             
+                    |       /                       |                  -+                             
+                    |     //                        |                  /                              
+                    |    /                          |                 /                               
+                    |  //                           |                /                                
+                   |  /                             |               /                                 
+                   |//                             |              //                                  
+                   +-                              |             /                                    
+                     --                            |            /                                     
+                       ---                         |           /                                      
+                          --                       |          /                                       
+                            ---                    |         /                                        
+                               --                  |        /                                         
+                                 --                |       /                                          
+                                   ---             |      /                                           
+                                      --           |    //                                            
+                                        ---        |   /                                              
+                                           --      |  /                                               
+                                             ---   | /                                                
+                                                -- |/                                                 
+                                                  -+                                                  
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                                                                                      
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html"></summary></entry></feed>
