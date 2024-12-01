@@ -45,6 +45,13 @@ void draw() {
   rect(10, 10, width-20, height-20);
 }
 
+void mouseMoved() {
+  float maxLineWidth = map(mouseX, 0, width, 1, 200);
+  float frequency = map(mouseY, 0, height, 1, 200);
+  println("maxLineWidth: " + maxLineWidth);
+  println("frequency   : " + frequency);
+}
+
 /* without shader */
 
 //PImage img;
